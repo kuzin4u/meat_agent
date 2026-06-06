@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Мясопереработка | Мясницкий ряд – модель с сохранением параметров</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #eef2f5;
+            margin: 0;
+            padding: 6px 8px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.2rem;
+            margin: 0 0 2px 0;
+            color: #1a3e2f;
+        }
+        .sub {
+            color: #4a5b52;
+            margin-bottom: 6px;
+            border-left: 3px solid #2b7a4b;
+            padding-left: 8px;
+            font-weight: 500;
+            font-size: 0.7rem;
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            padding: 4px 8px;
+            flex: 1 1 130px;
+            border: 1px solid #e0e7ed;
+        }
+        .card h3 {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #3d5a4c;
+            margin-top: 0;
+            margin-bottom: 2px;
+        }
+        .kpi-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1e2f28;
+            line-height: 1.2;
+        }
+        .kpi-unit {
+            font-size: 0.6rem;
+            font-weight: 400;
+            color: #6c7a73;
+        }
+        .grid-2cols {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .param-group {
+            background: white;
+            border-radius: 12px;
+            padding: 6px 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            border: 1px solid #e4e9f0;
+        }
+        .param-group h4 {
+            margin: 0 0 4px 0;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #1e4663;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .slider-container {
+            margin-bottom: 4px;
+        }
+        .slider-container label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 0.6rem;
+            margin-bottom: 2px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 1px 0;
+            cursor: pointer;
+            height: 3px;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.6rem;
+            margin-bottom: 3px;
+        }
+        button {
+            background: #2b7a4b;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+            width: 100%;
+            transition: 0.2s;
+            font-size: 0.65rem;
+        }
+        button:hover {
+            background: #1e5f3a;
+        }
+        .reset-btn {
+            background: #1e4663;
+        }
+        .reset-btn:hover {
+            background: #0f2e46;
+        }
+        .footer-note {
+            background: #fef9e3;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 0.6rem;
+            color: #7d6530;
+            margin-top: 6px;
+        }
+        .flex-between label {
+            font-size: 0.6rem;
+        }
+        input[type="radio"] {
+            margin-left: 4px;
+            margin-right: 2px;
+            transform: scale(0.85);
+        }
+        @media (max-width: 700px) {
+            .kpi-value { font-size: 1rem; }
+            .card { padding: 3px 6px; }
+            .grid-2cols { gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🥩 Мясопереработка | «Мясницкий ряд»</h1>
+    <div class="sub">Параметры автоматически сохраняются и восстанавливаются при следующем запуске. Доля сетей = 25% – целевые показатели 2025 г.</div>
+
+    <div class="dashboard">
+        <div class="card"><h3>💰 Выручка (мес)</h3><div class="kpi-value" id="revenueDisplay">0 ₽</div><div class="kpi-unit"></div></div>
+        <div class="card"><h3>📈 Валовая прибыль</h3><div class="kpi-value" id="grossProfitDisplay">0 ₽</div><div class="kpi-unit"></div></div>
+        <div class="card"><h3>🏭 EBIT</h3><div class="kpi-value" id="ebitDisplay">0 ₽</div><div class="kpi-unit"></div></div>
+        <div class="card"><h3>✅ Чистая прибыль</h3><div class="kpi-value" id="netProfitDisplay">0 ₽</div><div class="kpi-unit"></div></div>
+        <div class="card"><h3>🏬 Затраты на розничные сети</h3><div class="kpi-value" id="retailCostDisplay">0 ₽</div><div class="kpi-unit">коммерческие расходы</div></div>
+        <div class="card"><h3>💧 Оборотный капитал</h3><div class="kpi-value" id="wcDisplay">0 ₽</div><div class="kpi-unit"></div></div>
+        <div class="card"><h3>⚖️ Точка безубыт.</h3><div class="kpi-value" id="bepDisplay">0 т</div><div class="kpi-unit"></div></div>
+    </div>
+
+    <div class="grid-2cols">
+        <!-- БЛОК 1: ЭКЗОГЕННЫЕ ПАРАМЕТРЫ -->
+        <div class="param-group">
+            <h4>🌾 Базовые (рыночные)</h4>
+            <div class="slider-container"><label>🐷 Свинина <span id="swPriceVal">300</span> руб/кг</label><input type="range" id="swPrice" min="280" max="500" step="5" value="300"></div>
+            <div class="slider-container"><label>🐄 Говядина <span id="beefPriceVal">400</span> руб/кг</label><input type="range" id="beefPrice" min="380" max="620" step="5" value="400"></div>
+            <div class="slider-container"><label>🐔 Филе курицы <span id="chickPriceVal">240</span> руб/кг</label><input type="range" id="chickPrice" min="200" max="420" step="5" value="240"></div>
+            <div class="slider-container"><label>⚡ Электроэнергия <span id="energyRateVal">8.0</span> руб/кВт·ч</label><input type="range" id="energyRate" min="5" max="15" step="0.5" value="8"></div>
+            <div class="slider-container"><label>🌤️ Сезонность <span id="seasonVal">1.00</span></label><input type="range" id="seasonFactor" min="0.7" max="1.3" step="0.02" value="1.00"></div>
+        </div>
+
+        <!-- БЛОК 2: УПРАВЛЯЕМЫЕ ПАРАМЕТРЫ -->
+        <div class="param-group">
+            <h4>⚙️ Управляемые решения</h4>
+            <div class="slider-container"><label>🏭 Объём выпуска <span id="volumeVal">2650</span> т</label><input type="range" id="volume" min="100" max="5000" step="50" value="2650"></div>
+            <div class="slider-container"><label>📦 Доля колбасы <span id="shareCookedVal">50</span>%</label><input type="range" id="shareCooked" min="10" max="80" step="5" value="50"></div>
+            <div class="slider-container"><label>🍖 Доля деликатесов <span id="shareDelicacyVal">30</span>%</label><input type="range" id="shareDelicacy" min="5" max="70" step="5" value="30"></div>
+            <div class="slider-container"><label>🥟 Доля полуфабрикатов <span id="shareSemiVal">20</span>%</label><input type="range" id="shareSemi" min="0" max="70" step="5" value="20"></div>
+            <div class="slider-container"><label>🏷️ Цена колбасы <span id="priceCookedVal">350</span> руб/кг</label><input type="range" id="priceCooked" min="300" max="550" step="5" value="350"></div>
+            <div class="slider-container"><label>✨ Цена деликатесов <span id="priceDelicacyVal">550</span> руб/кг</label><input type="range" id="priceDelicacy" min="480" max="850" step="5" value="550"></div>
+            <div class="slider-container"><label>🍳 Цена полуфабрикатов <span id="priceSemiVal">300</span> руб/кг</label><input type="range" id="priceSemi" min="250" max="480" step="5" value="300"></div>
+            <div class="flex-between"><label>🏭 Режим работы:</label><div><label><input type="radio" name="shift" value="1" checked> 1 смена</label> <label><input type="radio" name="shift" value="2"> 2 смены (+18%)</label></div></div>
+            <div class="flex-between"><label>♻️ Утилизация отходов (НЕ влияет)</label><label><input type="checkbox" id="wasteUtilization"> Да (+3 руб/кг)</label></div>
+            <div class="slider-container"><label>📊 Доля розничных сетей <span id="retailShareVal">25</span>%</label><input type="range" id="retailShare" min="0" max="100" step="5" value="25"></div>
+            <div class="slider-container"><label>⏱️ Отсрочка сети <span id="dsoretVal">60</span> дн</label><input type="range" id="dsoret" min="30" max="120" step="5" value="60"></div>
+            <div class="slider-container"><label>🏨 Отсрочка HoReCa <span id="dsorecaVal">15</span> дн</label><input type="range" id="dsoreca" min="5" max="60" step="5" value="15"></div>
+            <div class="slider-container"><label>📦 Постоянные затраты <span id="fixedCostVal">170</span> млн ₽</label><input type="range" id="fixedCost" min="10" max="350" step="5" value="170"></div>
+            <div class="slider-container"><label>📉 Амортизация <span id="amortVal">14</span> млн ₽</label><input type="range" id="amortization" min="0" max="50" step="1" value="14"></div>
+            <button id="resetBtn" class="reset-btn">⟳ Сбросить к показателям 2025 (доля сетей 25%)</button>
+        </div>
+    </div>
+    <div class="footer-note">
+        📐 <strong>Сохранение параметров:</strong> все настройки автоматически запоминаются в браузере. После перезагрузки страницы модель восстановит последние использованные значения.<br>
+        🎯 <strong>Затраты на розничные сети</strong> = выручка × (2% + доля сетей × 3%).
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Элементы управления
+        const swPrice = document.getElementById('swPrice');
+        const beefPrice = document.getElementById('beefPrice');
+        const chickPrice = document.getElementById('chickPrice');
+        const energyRate = document.getElementById('energyRate');
+        const seasonFactor = document.getElementById('seasonFactor');
+        const volume = document.getElementById('volume');
+        const shareCooked = document.getElementById('shareCooked');
+        const shareDelicacy = document.getElementById('shareDelicacy');
+        const shareSemi = document.getElementById('shareSemi');
+        const priceCooked = document.getElementById('priceCooked');
+        const priceDelicacy = document.getElementById('priceDelicacy');
+        const priceSemi = document.getElementById('priceSemi');
+        const retailShare = document.getElementById('retailShare');
+        const dsoret = document.getElementById('dsoret');
+        const dsoreca = document.getElementById('dsoreca');
+        const fixedCost = document.getElementById('fixedCost');
+        const wasteCheck = document.getElementById('wasteUtilization');
+        const shiftRadios = document.querySelectorAll('input[name="shift"]');
+        const amortization = document.getElementById('amortization');
+        
+        // Спаны
+        const swPriceVal = document.getElementById('swPriceVal');
+        const beefPriceVal = document.getElementById('beefPriceVal');
+        const chickPriceVal = document.getElementById('chickPriceVal');
+        const energyRateVal = document.getElementById('energyRateVal');
+        const seasonVal = document.getElementById('seasonVal');
+        const volumeVal = document.getElementById('volumeVal');
+        const shareCookedVal = document.getElementById('shareCookedVal');
+        const shareDelicacyVal = document.getElementById('shareDelicacyVal');
+        const shareSemiVal = document.getElementById('shareSemiVal');
+        const priceCookedVal = document.getElementById('priceCookedVal');
+        const priceDelicacyVal = document.getElementById('priceDelicacyVal');
+        const priceSemiVal = document.getElementById('priceSemiVal');
+        const retailShareVal = document.getElementById('retailShareVal');
+        const dsoretVal = document.getElementById('dsoretVal');
+        const dsorecaVal = document.getElementById('dsorecaVal');
+        const fixedCostVal = document.getElementById('fixedCostVal');
+        const amortVal = document.getElementById('amortVal');
+        
+        // KPI
+        const revenueDisplay = document.getElementById('revenueDisplay');
+        const grossProfitDisplay = document.getElementById('grossProfitDisplay');
+        const ebitDisplay = document.getElementById('ebitDisplay');
+        const netProfitDisplay = document.getElementById('netProfitDisplay');
+        const retailCostDisplay = document.getElementById('retailCostDisplay');
+        const wcDisplay = document.getElementById('wcDisplay');
+        const bepDisplay = document.getElementById('bepDisplay');
+        
+        // Константы переменных затрат (производственные)
+        const packingPerKg = 12.0;
+        const kWhPerKg = 0.32;
+        const laborPerKg = 25.0;
+        const logisticsPerKg = 20.0;
+        const baseCommissionRate = 0.02;   // базовые 2% коммерческих расходов
+        
+        // ---- Функции сохранения и загрузки ----
+        function saveToLocalStorage() {
+            const settings = {
+                swPrice: swPrice.value,
+                beefPrice: beefPrice.value,
+                chickPrice: chickPrice.value,
+                energyRate: energyRate.value,
+                seasonFactor: seasonFactor.value,
+                volume: volume.value,
+                shareCooked: shareCooked.value,
+                shareDelicacy: shareDelicacy.value,
+                shareSemi: shareSemi.value,
+                priceCooked: priceCooked.value,
+                priceDelicacy: priceDelicacy.value,
+                priceSemi: priceSemi.value,
+                retailShare: retailShare.value,
+                dsoret: dsoret.value,
+                dsoreca: dsoreca.value,
+                fixedCost: fixedCost.value,
+                wasteUtilization: wasteCheck.checked,
+                shift: document.querySelector('input[name="shift"]:checked').value,
+                amortization: amortization.value
+            };
+            localStorage.setItem('meatModelSettings', JSON.stringify(settings));
+        }
+        
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('meatModelSettings');
+            if (!saved) return false;
+            try {
+                const s = JSON.parse(saved);
+                swPrice.value = s.swPrice;
+                beefPrice.value = s.beefPrice;
+                chickPrice.value = s.chickPrice;
+                energyRate.value = s.energyRate;
+                seasonFactor.value = s.seasonFactor;
+                volume.value = s.volume;
+                shareCooked.value = s.shareCooked;
+                shareDelicacy.value = s.shareDelicacy;
+                shareSemi.value = s.shareSemi;
+                priceCooked.value = s.priceCooked;
+                priceDelicacy.value = s.priceDelicacy;
+                priceSemi.value = s.priceSemi;
+                retailShare.value = s.retailShare;
+                dsoret.value = s.dsoret;
+                dsoreca.value = s.dsoreca;
+                fixedCost.value = s.fixedCost;
+                wasteCheck.checked = s.wasteUtilization === true;
+                amortization.value = s.amortization;
+                // radio button
+                const shiftVal = s.shift;
+                document.querySelectorAll('input[name="shift"]').forEach(radio => {
+                    if (radio.value === shiftVal) radio.checked = true;
+                });
+                return true;
+            } catch(e) { return false; }
+        }
+        
+        // ---- Основные расчётные функции ----
+        function updateLabels() {
+            swPriceVal.innerText = swPrice.value;
+            beefPriceVal.innerText = beefPrice.value;
+            chickPriceVal.innerText = chickPrice.value;
+            energyRateVal.innerText = parseFloat(energyRate.value).toFixed(1);
+            seasonVal.innerText = parseFloat(seasonFactor.value).toFixed(2);
+            volumeVal.innerText = volume.value;
+            shareCookedVal.innerText = shareCooked.value;
+            shareDelicacyVal.innerText = shareDelicacy.value;
+            shareSemiVal.innerText = shareSemi.value;
+            priceCookedVal.innerText = priceCooked.value;
+            priceDelicacyVal.innerText = priceDelicacy.value;
+            priceSemiVal.innerText = priceSemi.value;
+            retailShareVal.innerText = retailShare.value;
+            dsoretVal.innerText = dsoret.value;
+            dsorecaVal.innerText = dsoreca.value;
+            fixedCostVal.innerText = parseFloat(fixedCost.value).toFixed(0);
+            amortVal.innerText = amortization.value;
+        }
+        
+        function syncShares() {
+            let cooked = parseInt(shareCooked.value, 10);
+            let delic = parseInt(shareDelicacy.value, 10);
+            let semi = parseInt(shareSemi.value, 10);
+            let total = cooked + delic + semi;
+            if (total !== 100 && total > 0) {
+                let newSemi = 100 - cooked - delic;
+                if (newSemi < 0) newSemi = 0;
+                shareSemi.value = Math.min(70, newSemi);
+                shareSemiVal.innerText = shareSemi.value;
+            }
+        }
+        
+        function calculateAll() {
+            let swP = parseFloat(swPrice.value);
+            let beefP = parseFloat(beefPrice.value);
+            let chickP = parseFloat(chickPrice.value);
+            let eRate = parseFloat(energyRate.value);
+            let season = parseFloat(seasonFactor.value);
+            let volumeKg = parseFloat(volume.value) * 1000;
+            
+            let dCooked = parseFloat(shareCooked.value) / 100;
+            let dDelicacy = parseFloat(shareDelicacy.value) / 100;
+            let dSemi = parseFloat(shareSemi.value) / 100;
+            let sumD = dCooked + dDelicacy + dSemi;
+            if (sumD > 0) {
+                dCooked /= sumD;
+                dDelicacy /= sumD;
+                dSemi /= sumD;
+            }
+            
+            let pCooked = parseFloat(priceCooked.value);
+            let pDelicacy = parseFloat(priceDelicacy.value);
+            let pSemi = parseFloat(priceSemi.value);
+            
+            let retailShareNum = parseFloat(retailShare.value) / 100;
+            let horecaShare = 1 - retailShareNum;
+            let dsoretNum = parseFloat(dsoret.value);
+            let dsorecaNum = parseFloat(dsoreca.value);
+            let fixedRub = parseFloat(fixedCost.value) * 1e6;
+            let shiftMode = document.querySelector('input[name="shift"]:checked').value;
+            let amortRub = parseFloat(amortization.value) * 1e6;
+            
+            // Нормы выхода
+            const yieldCooked = 1.25;
+            const yieldDelicacy = 1.20;
+            const yieldSemi = 1.05;
+            const rawPerCooked = 1 / yieldCooked;
+            const rawPerDelicacy = 1 / yieldDelicacy;
+            const rawPerSemi = 1 / yieldSemi;
+            
+            // Рецептура
+            const recipe = {
+                cooked: { sw: 0.70, beef: 0.30, chick: 0 },
+                delicacy: { sw: 0.80, beef: 0.20, chick: 0 },
+                semi: { sw: 0.50, beef: 0.20, chick: 0.30 }
+            };
+            
+            function rawCostPerKg(product, sw, beef, chick) {
+                let rec = recipe[product];
+                let factor = product === 'cooked' ? rawPerCooked : (product === 'delicacy' ? rawPerDelicacy : rawPerSemi);
+                return (rec.sw * factor * sw) + (rec.beef * factor * beef) + (rec.chick * factor * chick);
+            }
+            
+            let rawCostCooked = rawCostPerKg('cooked', swP, beefP, chickP);
+            let rawCostDelicacy = rawCostPerKg('delicacy', swP, beefP, chickP);
+            let rawCostSemi = rawCostPerKg('semi', swP, beefP, chickP);
+            
+            let volCooked = volumeKg * dCooked;
+            let volDelicacy = volumeKg * dDelicacy;
+            let volSemi = volumeKg * dSemi;
+            
+            let totalRawCost = volCooked * rawCostCooked + volDelicacy * rawCostDelicacy + volSemi * rawCostSemi;
+            
+            // Переменные затраты (производственные)
+            let energyCost = volumeKg * kWhPerKg * eRate;
+            let packCost = volumeKg * packingPerKg;
+            let laborCost = volumeKg * laborPerKg;
+            let logCost = volumeKg * logisticsPerKg;
+            
+            let revenueBeforeSeason = volCooked * pCooked + volDelicacy * pDelicacy + volSemi * pSemi;
+            let revenue = revenueBeforeSeason * season;
+            
+            // Коммерческие расходы (затраты на розничные сети)
+            let networkExtraCostRate = retailShareNum * 0.03;   // 0..3%
+            let totalCommissionRate = baseCommissionRate + networkExtraCostRate;
+            let commission = revenue * totalCommissionRate;
+            let retailCost = commission;
+            
+            let totalVariableCost = totalRawCost + packCost + energyCost + laborCost + logCost + commission;
+            let grossProfit = revenue - totalVariableCost;
+            
+            // Утилизация отходов НЕ влияет (обнулена)
+            let contribution = grossProfit;
+            
+            let shiftFactor = (shiftMode === '2') ? 1.18 : 1.0;
+            let totalFixed = fixedRub * shiftFactor;
+            let ebit = contribution - totalFixed;
+            
+            let profitBeforeTax = ebit - amortRub;
+            let tax = profitBeforeTax > 0 ? profitBeforeTax * 0.20 : 0;
+            let netProfit = profitBeforeTax - tax;
+            
+            // Оборотный капитал
+            let avgDSO = dsoretNum * retailShareNum + dsorecaNum * horecaShare;
+            let ccc = avgDSO + 20 - 15;
+            let dailyRevenue = revenue / 30;
+            let wcNeeded = dailyRevenue * ccc;
+            if (wcNeeded < 0) wcNeeded = 0;
+            
+            // Точка безубыточности по EBIT
+            let avgContrPerKg = contribution / volumeKg;
+            let bepTons = (avgContrPerKg > 0) ? (totalFixed / avgContrPerKg) / 1000 : 0;
+            
+            revenueDisplay.innerText = Math.round(revenue).toLocaleString() + ' ₽';
+            grossProfitDisplay.innerText = Math.round(grossProfit).toLocaleString() + ' ₽';
+            ebitDisplay.innerText = Math.round(ebit).toLocaleString() + ' ₽';
+            netProfitDisplay.innerText = Math.round(netProfit).toLocaleString() + ' ₽';
+            retailCostDisplay.innerText = Math.round(retailCost).toLocaleString() + ' ₽';
+            wcDisplay.innerText = Math.round(wcNeeded).toLocaleString() + ' ₽';
+            bepDisplay.innerText = bepTons.toFixed(1) + ' т';
+        }
+        
+        function refreshAll() {
+            updateLabels();
+            syncShares();
+            calculateAll();
+            saveToLocalStorage();  // сохраняем после каждого изменения
+        }
+        
+        function resetToTarget() {
+            swPrice.value = '300';
+            beefPrice.value = '400';
+            chickPrice.value = '240';
+            energyRate.value = '8';
+            seasonFactor.value = '1.00';
+            volume.value = '2650';
+            shareCooked.value = '50';
+            shareDelicacy.value = '30';
+            shareSemi.value = '20';
+            priceCooked.value = '350';
+            priceDelicacy.value = '550';
+            priceSemi.value = '300';
+            retailShare.value = '25';
+            dsoret.value = '60';
+            dsoreca.value = '15';
+            fixedCost.value = '170';
+            wasteCheck.checked = false;
+            amortization.value = '14';
+            document.querySelector('input[name="shift"][value="1"]').checked = true;
+            refreshAll();
+        }
+        
+        // ---- Назначение обработчиков с сохранением ----
+        const allInputs = [swPrice, beefPrice, chickPrice, energyRate, seasonFactor, volume, 
+            shareCooked, shareDelicacy, shareSemi, priceCooked, priceDelicacy, priceSemi, 
+            retailShare, dsoret, dsoreca, fixedCost, wasteCheck, amortization];
+        allInputs.forEach(el => el.addEventListener('input', refreshAll));
+        shiftRadios.forEach(radio => radio.addEventListener('change', refreshAll));
+        
+        shareCooked.addEventListener('input', () => { syncShares(); refreshAll(); });
+        shareDelicacy.addEventListener('input', () => { syncShares(); refreshAll(); });
+        shareSemi.addEventListener('input', refreshAll);
+        
+        document.getElementById('resetBtn').addEventListener('click', resetToTarget);
+        
+        // ---- Загрузка сохранённых параметров или установка целевых по умолчанию ----
+        const loaded = loadFromLocalStorage();
+        if (!loaded) {
+            // устанавливаем целевые значения 2025 (доля сетей 25%, постоянные 170)
+            resetToTarget();
+        } else {
+            // после загрузки принудительно обновляем интерфейс и пересчёт
+            refreshAll();
+        }
+    })();
+</script>
+</body>
+</html>
