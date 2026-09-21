@@ -321,8 +321,7 @@ function render(){
       <div class="grp">${TOP.map(([id,n])=>`<div class="cell"><span class="ic">${catIcon(byId[id].cat)}</span>
         <span class="tx"><b>${byId[id].name}</b><span class="why">покупали ${n} ${pl(n,['раз','раза','раз'])} · ${rub(byId[id].price)}${byId[id].unit==='кг'?'/кг':''}</span></span>
         <button class="add" data-add="${id}">+</button></div>`).join('')}</div>
-      <div class="note">Подборка построена по истории покупок и программе лояльности — данные остаются в приложении.</div>
-      <div class="note" style="text-align:center"><a href="#" data-legal="legal-terms" style="color:var(--brand)">Соглашение</a> · <a href="#" data-legal="legal-privacy" style="color:var(--brand)">Политика</a> · <a href="#" data-legal="legal-support" style="color:var(--brand)">Поддержка</a> · демо-версия</div>`;
+      <div class="note">Подборка построена по истории покупок и программе лояльности — данные остаются в приложении.</div>`;
   }
   if(view==='cart'){
     const ids=Object.keys(cart), g=goods(), delivery=g>=2000?0:149, bonus=Math.min(1240,Math.round(g*0.2));
@@ -344,13 +343,7 @@ function render(){
       <div class="grp"><div class="cell"><span class="tx" id="phoneRow"><b>Номер телефона</b><span>подтвердить через MAX для программы лояльности</span></span><button class="add" data-act="phone">Запросить</button></div></div>
       <div class="hdr">История покупок — основа подборок</div>
       <div class="grp">${rows.map(([id,n])=>`<div class="cell"><span class="ic">${catIcon(byId[id].cat)}</span><span class="tx"><b>${byId[id].name}</b><span>покупали ${n} ${pl(n,['раз','раза','раз'])}</span></span></div>`).join('')}</div>
-      <div class="note">Эти данные не передаются в языковую модель: помощник получает только текст запроса, а позицию внутри товарной группы выбирает модель магазина по профилю.</div>
-      <div class="hdr">О сервисе</div>
-      <div class="grp">
-        <div class="cell"><span class="tx"><b>Пользовательское соглашение</b><span>условия использования демо-версии</span></span><button class="add" data-act="legal-terms">Открыть</button></div>
-        <div class="cell"><span class="tx"><b>Политика конфиденциальности</b><span>какие данные обрабатываются</span></span><button class="add" data-act="legal-privacy">Открыть</button></div>
-        <div class="cell"><span class="tx"><b>Разработчик и поддержка</b><span>LuckLyrics · +7 925 378-14-81</span></span><button class="add" data-act="legal-support">Открыть</button></div>
-      </div>`;
+      <div class="note">Эти данные не передаются в языковую модель: помощник получает только текст запроса, а позицию внутри товарной группы выбирает модель магазина по профилю.</div>`;
   }
   if(view==='checkout'){
     const g=goods(), delivery=g>=2000?0:149, bonus=Math.min(1240,Math.round(g*0.2));
@@ -406,33 +399,6 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='askInp'){ const s=document.querySelector('[data-act="send"]'); s&&s.click(); }});
 $('sheet').addEventListener('click',e=>{ if(e.target.id==='sheet'){ tap(); sheet(false); }});
 tap(0); render();
-
-
-const LEGAL = {
-  'legal-terms': ['Пользовательское соглашение', [
-    'Это демонстрационная версия мини-приложения. Она показывает, как работает подбор набора и оформление заказа, но не создаёт реальных заказов и не принимает оплату.',
-    'Товары, цены и наличие — срез каталога «Мясницкого ряда» для демонстрации и могут отличаться от действующих. Реальный заказ оформляется на shop.kolbasa.ru или в приложении магазина.',
-    'Пользуясь демо-версией, вы соглашаетесь, что результаты подбора носят ознакомительный характер.']],
-  'legal-privacy': ['Политика конфиденциальности', [
-    'Демо-версия не сохраняет и не передаёт персональные данные на сервер. Имя из аккаунта MAX используется только для приветствия на экране.',
-    'Номер телефона, если вы нажмёте «Запросить», показывается только на вашем устройстве и никуда не отправляется.',
-    'Текст запроса к помощнику обрабатывается на устройстве. В рабочей версии в языковую модель передаётся только текст запроса — без имени, телефона, адреса и истории покупок.']],
-  'legal-support': ['Разработчик и поддержка', [
-    'Разработчик: LuckLyrics.',
-    'Телефон: +7 925 378-14-81.',
-    'Почта: sergey.kuzin.lucklyrics@gmail.com.',
-    'По вопросам заказов «Мясницкого ряда» — 8 (495) 937-12-27, с 9:00 до 21:00.']]
-};
-function showLegal(key){
-  const d = LEGAL[key]; if(!d) return;
-  $('sheetBody').innerHTML = '<div class="hdr">' + d[0] + '</div><div class="grp">' +
-    d[1].map(x => '<div class="cell"><span class="tx"><span style="color:var(--ios-label);font-size:14.5px">' + x + '</span></span></div>').join('') + '</div>';
-  sheet(true);
-}
-document.addEventListener('click', e => {
-  const b = e.target.closest('[data-act^="legal-"],[data-legal]'); if(!b) return;
-  e.preventDefault(); showLegal(b.dataset.act || b.dataset.legal);
-});
 
 /* ─── MAX Bridge ─────────────────────────────────────────────── */
 var MX = (typeof window!=='undefined' && window.WebApp) ? window.WebApp : null;
