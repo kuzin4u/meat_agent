@@ -299,6 +299,7 @@ footer{background:#fff}
 .co-cards{display:flex;gap:4px;flex:none}
 .co-cards i{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.02em;border:1px solid var(--rule);border-radius:5px;padding:3px 5px;color:#44444A;background:#fff}
 </style>
+<style id="no-max-desktop">@media (hover:hover) and (pointer:fine){.mr-nav a[href="max-miniapp.html"],a[href="max-miniapp.html"]{display:none!important}}</style>
 </head>
 <body>
 
@@ -324,7 +325,7 @@ footer{background:#fff}
     <div class="chat">
       <div class="chat-head">
         <div class="ai-ava">AI</div>
-        <div><div class="t">Помощник по рецептам</div><div class="s" id="chatSub">Найду рецепт и соберу продукты</div></div>
+        <div><div class="t">Помощник · Готовим по рецепту</div><div class="s" id="chatSub">Найду рецепт и соберу продукты</div></div>
         <button class="clear-chat" id="clearChat" title="Очистить чат">↺ Очистить чат</button>
         <span class="demo">демо</span>
       </div>
@@ -740,7 +741,7 @@ async function pick(idx){
   if(!added.length){
     botMsg('Для этого рецепта в каталоге «Мясницкого ряда» нет подходящих товаров — например, нужны ингредиенты, которых нет в ассортименте. Выберите рецепт с отметкой «есть в магазине» или уточните запрос.');
   } else {
-    let html=`Собрал корзину для «${esc(r.t)}» на ${n} ${plural(n,['порцию','порции','порций'])}:<div class="cart-add">`;
+    let html=`Собрал набор для «${esc(r.t)}» на ${n} ${plural(n,['порцию','порции','порций'])}:<div class="cart-add">`;
     const repls=[];
     added.forEach(a=>{
       html+=`<div class="ci">${catIcon(a.used.cat)}<span class="nm">${esc(a.used.name)}</span><span class="qt">${qlabel(a.used,a.qty)}</span><span class="pr">${rub(lineCost(a.used,a.qty))}</span></div>`;

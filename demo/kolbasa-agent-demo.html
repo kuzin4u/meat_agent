@@ -260,6 +260,7 @@ footer{background:#fff}
 .co-cards{display:flex;gap:4px;flex:none}
 .co-cards i{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.02em;border:1px solid var(--rule);border-radius:5px;padding:3px 5px;color:#44444A;background:#fff}
 </style>
+<style id="no-max-desktop">@media (hover:hover) and (pointer:fine){.mr-nav a[href="max-miniapp.html"],a[href="max-miniapp.html"]{display:none!important}}</style>
 </head>
 <body>
 
@@ -285,7 +286,7 @@ footer{background:#fff}
     <div class="chat">
       <div class="chat-head">
         <div class="ai-ava">AI</div>
-        <div><div class="t">Помощник по покупкам</div><div class="s" id="chatSub">Соберу мясной стол под ваш повод</div></div>
+        <div><div class="t">Помощник · Собрать стол</div><div class="s" id="chatSub">Соберу стол под ваш повод</div></div>
         <button class="clear-chat" id="clearChat" title="Очистить чат">↺ Очистить чат</button>
         <span class="demo">демо</span>
       </div>
@@ -453,7 +454,9 @@ function lineCost(p, qty){ return p.price*qty; }
 function addToCart(id, qty){
   const p = byId[id]; if(!p) return null;
   let used=p, replaced=null;
-  if(!p.stock && p.repl && byId[p.repl]){ replaced=p; used=byId[p.repl]; id=used.id; }
+  if(!p.stock && p.repl && byId[p.repl]){ replaced=p; used=byId[p.repl]; id=used.id;
+    if(used.unit!==p.unit){ const kg = p.unit==='кг' ? qty : qty*p.pack;
+      qty = used.unit==='кг' ? Math.max(0.05, Math.round(kg*20)/20) : Math.max(1, Math.ceil(kg/used.pack)); } }
   if(!cart[id]) cart[id]={qty:0};
   cart[id].qty += qty;
   return {used, replaced, qty};
@@ -499,7 +502,7 @@ function botMsg(html){ const m=document.createElement('div'); m.className='msg b
 function userMsg(t){ const m=document.createElement('div'); m.className='msg user'; m.textContent=t; $('chatLog').appendChild(m); $('chatLog').scrollTop=$('chatLog').scrollHeight; }
 
 function buildCartMsg(added, opts={}){
-  let html = opts.intro || 'Собрал корзину:';
+  let html = opts.intro || 'Собрал набор:';
   html += '<div class="cart-add">';
   let repls=[];
   added.forEach(a=>{
@@ -533,6 +536,15 @@ function buildSet(key, guests, budget){
     if(byId[id] && byId[id].unit==='шт') qty=Math.max(1, Math.round(q*(guests/ (key==='breakfast'?2:6)) ));
     const a=addToCart(id, qty); if(a) added.push(a);
   });
+  if(budget){   // укладываемся в бюджет: снимаем вес с самых дорогих позиций
+    let k=0; const sum=()=>Object.keys(cart).reduce((s,i)=>s+lineCost(byId[i],cart[i].qty),0);
+    while(sum()>budget && k++<14){
+      const ids=Object.keys(cart).sort((a,b)=>lineCost(byId[b],cart[b].qty)-lineCost(byId[a],cart[a].qty)); if(!ids.length) break;
+      const i=ids[0];
+      if(byId[i].unit==='кг'&&cart[i].qty>0.2) cart[i].qty=Math.round((cart[i].qty-0.1)*20)/20; else delete cart[i];
+    }
+    for(let j=added.length-1;j>=0;j--){ const a=added[j]; if(!cart[a.used.id]) added.splice(j,1); else a.qty=cart[a.used.id].qty; }
+  }
   renderCart();
   return added;
 }
